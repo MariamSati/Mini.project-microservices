@@ -1,0 +1,161 @@
+version: '3.8'
+
+services:
+  keycloak-db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: keycloak_db
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: "${KEYCLOAK_DB_PASSWORD}"
+    volumes:
+      - keycloak-db-data:/var/lib/postgresql/data
+    networks:
+      - micro-net
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    environment:
+      KEYCLOAK_ADMIN: "${KEYCLOAK_ADMIN}"
+      KEYCLOAK_ADMIN_PASSWORD: "${KEYCLOAK_ADMIN_PASSWORD}"
+      KC_DB: postgres
+      KC_DB_URL_HOST: keycloak-db
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: "${KEYCLOAK_DB_PASSWORD}"
+    command: start-dev --http-relative-path=/auth --import-realm
+    volumes:
+      - ../keycloak-config:/opt/keycloak/data/import:ro
+    ports:
+      - 8180:8080  # Expose Keycloak on host port 8180 to avoid conflict with gateway
+    depends_on:
+      - keycloak-db
+    networks:
+      - micro-net
+
+  postgres-produit:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: produit_db
+      POSTGRES_USER: produit
+      POSTGRES_PASSWORD: "${PRODUIT_DB_PASSWORD}"
+    volumes:
+      - produit-db-data:/var/lib/postgresql/data
+    networks:
+      - micro-net
+
+  postgres-commande:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: commande_db
+      POSTGRES_USER: commande
+      POSTGRES_PASSWORD: "${COMMANDE_DB_PASSWORD}"
+    volumes:
+      - commande-db-data:/var/lib/postgresql/data
+    networks:
+      - micro-net
+
+  microservice-produit:
+    build:
+      context: ../microservice-produit
+      dockerfile: Dockerfile
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-produit:5432/produit_db
+      SPRING_DATASOURCE_USERNAME: produit
+      SPRING_DATASOURCE_PASSWORD: "${PRODUIT_DB_PASSWORD}"
+      KEYCLOAK_ISSUER_URI: http://keycloak:8080/realms/mini-projet
+    depends_on:
+      - postgres-produit
+      - keycloak
+    ports:
+      - 8081:8081
+    networks:
+      - micro-net
+
+  microservice-commande:
+    build:
+      context: ../microservice-commande
+      dockerfile: Dockerfile
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-commande:5432/commande_db
+      SPRING_DATASOURCE_USERNAME: commande
+      SPRING_DATASOURCE_PASSWORD: "${COMMANDE_DB_PASSWORD}"
+      KEYCLOAK_ISSUER_URI: http://keycloak:8080/realms/mini-projet
+    depends_on:
+      - postgres-commande
+      - microservice-produit
+      - keycloak
+    ports:
+      - 8082:8082
+    networks:
+      - micro-net
+
+  api-gateway:
+    build:
+      context: ../api-gateway
+      dockerfile: Dockerfile
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      KEYCLOAK_ISSUER_URI: http://keycloak:8080/realms/mini-projet
+    depends_on:
+      - microservice-produit
+      - microservice-commande
+      - keycloak
+    ports:
+      - 8080:8080
+    networks:
+      - micro-net
+
+  frontend-react:
+    build:
+      context: ../frontend-react
+      dockerfile: Dockerfile
+    ports:
+      - 3000:80
+    environment:
+      REACT_APP_GATEWAY_URL: http://localhost:8080
+      REACT_APP_KEYCLOAK_URL: http://localhost:8180/auth
+      REACT_APP_KEYCLOAK_REALM: mini-projet
+      REACT_APP_KEYCLOAK_CLIENT: frontend
+    depends_on:
+      - api-gateway
+      - keycloak
+    networks:
+      - micro-net
+
+  sonarqube:
+    image: sonarqube:9.9-community
+    environment:
+      SONARQUBE_JDBC_URL: jdbc:postgresql://sonar-db:5432/sonar
+    ports:
+      - 9000:9000
+    networks:
+      - micro-net
+    # Placeholder only; not fully configured in this demo.
+
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - 9090:9090
+    networks:
+      - micro-net
+
+  grafana:
+    image: grafana/grafana:9.5
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    ports:
+      - 3001:3000
+    networks:
+      - micro-net
+
+volumes:
+  keycloak-db-data:
+  produit-db-data:
+  commande-db-data:
+
+networks:
+  micro-net:
+    driver: bridge

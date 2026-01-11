@@ -1,0 +1,24 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'microservice-produit'
+    static_configs:
+      - targets: ['microservice-produit:8081']
+        labels:
+          group: 'produit'
+    metrics_path: /actuator/prometheus
+
+  - job_name: 'microservice-commande'
+    static_configs:
+      - targets: ['microservice-commande:8082']
+        labels:
+          group: 'commande'
+    metrics_path: /actuator/prometheus
+
+  - job_name: 'api-gateway'
+    static_configs:
+      - targets: ['api-gateway:8080']
+        labels:
+          group: 'gateway'
+    metrics_path: /actuator/prometheus

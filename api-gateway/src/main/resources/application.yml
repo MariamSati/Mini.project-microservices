@@ -1,0 +1,28 @@
+server:
+  port: 8080
+
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://keycloak:8080/realms/mini-projet
+
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: produits
+          uri: http://microservice-produit:8081
+          predicates:
+            - Path=/api/produits/**
+        - id: commandes
+          uri: http://microservice-commande:8082
+          predicates:
+            - Path=/api/commandes/**
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,info,prometheus"

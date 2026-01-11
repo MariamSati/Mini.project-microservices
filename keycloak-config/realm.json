@@ -1,0 +1,70 @@
+{
+  "realm": "mini-projet",
+  "enabled": true,
+  "sslRequired": "external",
+  "registrationAllowed": false,
+  "users": [
+    {
+      "username": "admin",
+      "email": "admin@example.com",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        { "type": "password", "value": "admin", "temporary": false }
+      ],
+      "realmRoles": ["ADMIN"]
+    },
+    {
+      "username": "client",
+      "email": "client@example.com",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        { "type": "password", "value": "client", "temporary": false }
+      ],
+      "realmRoles": ["CLIENT"]
+    }
+  ],
+  "roles": {
+    "realm": ["ADMIN", "CLIENT"]
+  },
+  "clients": [
+    {
+      "clientId": "frontend",
+      "enabled": true,
+      "publicClient": true,
+      "redirectUris": ["http://localhost:3000/*"],
+      "protocol": "openid-connect",
+      "attributes": {
+        "post.logout.redirect.uris": "http://localhost:3000"
+      }
+    },
+    {
+      "clientId": "backend-services",
+      "enabled": true,
+      "publicClient": false,
+      "secret": "backend-secret",
+      "serviceAccountsEnabled": true,
+      "protocol": "openid-connect",
+      "protocolMappers": [
+        {
+          "name": "audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.client.audience": "backend-services",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "aud",
+            "userinfo.token.claim": "false"
+          }
+        }
+      ],
+      "attributes": {}
+    }
+  ],
+  "protocolMappers": [],
+  "clientScopes": [],
+  "defaultRoles": ["CLIENT"]
+}

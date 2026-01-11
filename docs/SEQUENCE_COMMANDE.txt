@@ -1,0 +1,15 @@
+Sequence: Création d'une commande (simplifié)
+
+User -> Keycloak: Login (redirect), obtain JWT
+User -> Gateway: POST /api/commandes (Authorization: Bearer JWT)
+Gateway -> Commande-service: POST /api/commandes (JWT forwarded)
+Commande-service -> Gateway -> Produit-service: GET /api/produits/{id} (JWT forwarded)  // check price & stock
+Produit-service -> Commande-service: 200 + product info
+Commande-service -> Gateway -> Produit-service: POST /api/produits/{id}/decrement?quantite=x (JWT forwarded) // reserve stock
+Produit-service -> Commande-service: 200 OK
+Commande-service: calculates total, persists Commande
+Commande-service -> User (via Gateway): 201 Created
+
+Error cases:
+- Product not found -> 404 -> return 400 to user
+- Stock insufficient -> 400 -> return 400 to user
