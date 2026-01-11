@@ -1,0 +1,29 @@
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/produit_db}
+    username: ${SPRING_DATASOURCE_USERNAME:produit}
+    password: ${SPRING_DATASOURCE_PASSWORD:produit_password}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+
+server:
+  port: ${SERVER_PORT:8081}
+
+logging:
+  level:
+    root: INFO
+
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://keycloak:8080/realms/mini-projet}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,info,prometheus"

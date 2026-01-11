@@ -10,9 +10,15 @@
       "enabled": true,
       "emailVerified": true,
       "credentials": [
-        { "type": "password", "value": "admin", "temporary": false }
+        {
+          "type": "password",
+          "value": "admin",
+          "temporary": false
+        }
       ],
-      "realmRoles": ["ADMIN"]
+      "realmRoles": [
+        "ADMIN"
+      ]
     },
     {
       "username": "client",
@@ -20,20 +26,37 @@
       "enabled": true,
       "emailVerified": true,
       "credentials": [
-        { "type": "password", "value": "client", "temporary": false }
+        {
+          "type": "password",
+          "value": "client",
+          "temporary": false
+        }
       ],
-      "realmRoles": ["CLIENT"]
+      "realmRoles": [
+        "CLIENT"
+      ]
     }
   ],
   "roles": {
-    "realm": ["ADMIN", "CLIENT"]
+    "realm": [
+      {
+        "name": "ADMIN",
+        "description": "Administrator role"
+      },
+      {
+        "name": "CLIENT",
+        "description": "Customer role"
+      }
+    ]
   },
   "clients": [
     {
       "clientId": "frontend",
       "enabled": true,
       "publicClient": true,
-      "redirectUris": ["http://localhost:3000/*"],
+      "redirectUris": [
+        "http://localhost:3000/*"
+      ],
       "protocol": "openid-connect",
       "attributes": {
         "post.logout.redirect.uris": "http://localhost:3000"
@@ -66,5 +89,7 @@
   ],
   "protocolMappers": [],
   "clientScopes": [],
-  "defaultRoles": ["CLIENT"]
+  "defaultRoles": [
+    "CLIENT"
+  ]
 }

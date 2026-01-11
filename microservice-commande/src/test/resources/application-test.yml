@@ -1,0 +1,22 @@
+spring:
+  datasource:
+    url: jdbc:tc:postgresql:15:///commande_db
+    username: commande
+    password: commande_password
+
+produit:
+  service:
+    url: http://localhost:8089 # Will be overridden by WireMock dynamic port via properties if needed
+
+service:
+  token: test-token
+
+# Disable security for test profile by allowing all requests
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8180/realms/mini-projet
+
+# Alternatively, tests expect Authorization header but the wiremock does not validate

@@ -4,7 +4,7 @@ services:
   keycloak-db:
     image: postgres:15
     environment:
-      POSTGRES_DB: keycloak_db
+      POSTGRES_DB: keycloak
       POSTGRES_USER: keycloak
       POSTGRES_PASSWORD: "${KEYCLOAK_DB_PASSWORD}"
     volumes:
@@ -143,7 +143,7 @@ services:
       - micro-net
 
   grafana:
-    image: grafana/grafana:9.5
+    image: grafana/grafana:latest
     environment:
       GF_SECURITY_ADMIN_PASSWORD: admin
     ports:

@@ -1,0 +1,22 @@
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/commande_db}
+    username: ${SPRING_DATASOURCE_USERNAME:commande}
+    password: ${SPRING_DATASOURCE_PASSWORD:commande_password}
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+server:
+  port: ${SERVER_PORT:8082}
+
+logging:
+  level:
+    root: INFO
+
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://keycloak:8080/realms/mini-projet}
